@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galeria da Festa</title>
+
+<style>
+body{
+    margin:0;
+    text-align:center;
+    background:#f5f5f5;
+}
+
+video{
+    width:100%;
+    max-width:500px;
+}
+
+.moldura{
+    position:absolute;
+    width:100%;
+    max-width:500px;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    pointer-events:none;
+}
+
+.container{
+    position:relative;
+    display:inline-block;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Galeria da Festa</h2>
+
+<div class="container">
+    <video id="camera" autoplay playsinline></video>
+
+    <img class="moldura"
+    src="moldura.png">
+</div>
+
+<script>
+navigator.mediaDevices.getUserMedia({
+video:true
+})
+.then(stream=>{
+document.getElementById("camera").srcObject=stream;
+});
+</script>
+
+</body>
+</html>
