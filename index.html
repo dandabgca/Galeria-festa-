@@ -28,32 +28,29 @@ h1{
     cursor:pointer;
     background:#2196f3;
     color:white;
+    font-size:16px;
 }
 
 .container{
-
     position:relative;
     display:inline-block;
     width:100%;
     max-width:400px;
     overflow:hidden;
-
 }
 
-
 #camera{
-
     width:100%;
+    min-height:500px;
+    background:black;
+    object-fit:cover;
     display:block;
     border-radius:10px;
     position:relative;
     z-index:1;
-
 }
 
-
 #moldura{
-
     position:absolute;
     top:0;
     left:0;
@@ -61,12 +58,9 @@ h1{
     height:100%;
     z-index:2;
     pointer-events:none;
-
 }
 
-
 #capturar{
-
     margin-top:20px;
     padding:12px 25px;
     font-size:18px;
@@ -75,26 +69,18 @@ h1{
     background:#4caf50;
     color:white;
     cursor:pointer;
-
 }
 
-
 #fotoCanvas{
-
     display:none;
-
 }
 
 </style>
-
 </head>
-
 
 <body>
 
-
 <h1>📸 Galeria da Festa</h1>
-
 
 <div class="botoes">
 
@@ -102,221 +88,143 @@ h1{
 Moldura 1
 </button>
 
-
 <button onclick="trocarMoldura('Moldura2.png')">
 Moldura 2
 </button>
-
 
 <button onclick="trocarMoldura('Moldura3.png')">
 Moldura 3
 </button>
 
-
 </div>
-
-
 
 <div class="container">
 
+<video
+    id="camera"
+    autoplay
+    playsinline
+    muted>
+</video>
 
-<video id="camera" autoplay playsinline></video>
-
-
-<img id="moldura" src="Moldura1.png">
-
+<img
+    id="moldura"
+    src="Moldura1.png"
+    alt="Moldura">
 
 </div>
 
-
 <br>
-
 
 <button id="capturar">
 📸 Tirar Foto
 </button>
 
-
-
 <canvas id="fotoCanvas"></canvas>
-
-
 
 <script>
 
-
 const video = document.getElementById("camera");
-
 const canvas = document.getElementById("fotoCanvas");
-
 const ctx = canvas.getContext("2d");
-
 const moldura = document.getElementById("moldura");
 
+async function iniciarCamera() {
 
+    try {
 
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user"
+            },
+            audio: false
+        });
 
-// ABRIR CÂMERA
+        video.srcObject = stream;
 
-navigator.mediaDevices.getUserMedia({
+        await video.play();
 
-    video:{
-        facingMode:"user"
-    },
+        console.log("Câmera iniciada com sucesso");
 
-    audio:false
+    } catch (erro) {
 
-})
+        console.error(erro);
 
-.then(stream=>{
+        alert(
+            "Não foi possível acessar a câmera. Verifique a permissão da câmera no navegador."
+        );
 
-    video.srcObject = stream;
-
-
-    video.onloadedmetadata = ()=>{
-
-        video.play();
-
-    };
-
-
-})
-
-.catch(error=>{
-
-    alert("Erro ao abrir câmera: " + error);
-
-});
-
-
-
-
-
-// TROCAR MOLDURA
-
-function trocarMoldura(nomeArquivo){
-
-
-    const nova = new Image();
-
-
-    nova.onload=function(){
-
-        moldura.src = nomeArquivo;
-
-    };
-
-
-    nova.onerror=function(){
-
-        alert("Não encontrei a imagem: " + nomeArquivo);
-
-    };
-
-
-    nova.src = nomeArquivo;
-
+    }
 
 }
 
+iniciarCamera();
 
+function trocarMoldura(nomeArquivo){
 
+    const teste = new Image();
 
+    teste.onload = function(){
+        moldura.src = nomeArquivo;
+    };
 
+    teste.onerror = function(){
+        alert("Imagem não encontrada: " + nomeArquivo);
+    };
 
-// TIRAR FOTO
+    teste.src = nomeArquivo;
+
+}
 
 document.getElementById("capturar")
-.addEventListener("click",()=>{
+.addEventListener("click", () => {
 
+    if (!video.videoWidth) {
 
-    if(!video.videoWidth){
-
-        alert("A câmera ainda está carregando.");
+        alert("A câmera ainda não carregou.");
 
         return;
 
     }
 
-
-
     canvas.width = video.videoWidth;
-
     canvas.height = video.videoHeight;
 
-
-
-    // FOTO
-
     ctx.drawImage(
-
         video,
-
         0,
-
         0,
-
         canvas.width,
-
         canvas.height
-
     );
-
-
-
-
-
-    // MOLDURA
 
     const img = new Image();
 
-
-    img.onload=function(){
-
+    img.onload = function(){
 
         ctx.drawImage(
-
             img,
-
             0,
-
             0,
-
             canvas.width,
-
             canvas.height
-
         );
 
+        const link = document.createElement("a");
 
+        link.download = "foto-festa.png";
 
-        const link=document.createElement("a");
-
-
-        link.download="foto-festa.png";
-
-
-        link.href=canvas.toDataURL("image/png");
-
+        link.href = canvas.toDataURL("image/png");
 
         link.click();
 
-
-
     };
 
-
-
-    img.src=moldura.src;
-
-
+    img.src = moldura.src;
 
 });
 
-
-
 </script>
-
 
 </body>
 </html>
