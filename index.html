@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -35,14 +36,18 @@ h1{
     position:relative;
     width:100%;
     max-width:400px;
+    aspect-ratio:9/16;
     margin:auto;
+    overflow:hidden;
+    background:#000;
+    border-radius:10px;
 }
 
 #camera{
     width:100%;
+    height:100%;
+    object-fit:cover;
     display:block;
-    background:#000;
-    border-radius:10px;
 }
 
 #moldura{
@@ -50,7 +55,8 @@ h1{
     top:0;
     left:0;
     width:100%;
-    height:auto;
+    height:100%;
+    object-fit:cover;
     pointer-events:none;
     z-index:2;
 }
@@ -78,7 +84,9 @@ h1{
 
 <body>
 
-<h1>📸 Galeria da Festa</h1>
+
+<h1>📸 Galeria Noah e Valentina</h1>
+
 
 <div class="botoes">
 
@@ -96,21 +104,23 @@ Moldura 3
 
 </div>
 
+
 <div class="container">
 
 <video
-    id="camera"
-    autoplay
-    playsinline
-    muted>
+id="camera"
+autoplay
+playsinline
+muted>
 </video>
 
+
 <img
-    id="moldura"
-    src="Moldura1.png"
-    alt="Moldura">
+id="moldura"
+src="Moldura1.png">
 
 </div>
+
 
 <br>
 
@@ -118,56 +128,78 @@ Moldura 3
 📸 Tirar Foto
 </button>
 
+
 <canvas id="fotoCanvas"></canvas>
 
+
 <script>
+
 
 const SUPABASE_URL =
 "https://wnbarrxdifratefmujch.supabase.co";
 
+
 const SUPABASE_KEY =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduYmFycnhkaWZyYXRlZm11amNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNTM3OTMsImV4cCI6MjA5OTcyOTc5M30.70ZCtnf8rdkhPdgaJqsNEl9F8UxHRWgkDMTFqvi-SDI";
 
+
 const supabaseClient =
 supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
-const video = document.getElementById("camera");
-const canvas = document.getElementById("fotoCanvas");
-const ctx = canvas.getContext("2d");
-const moldura = document.getElementById("moldura");
 
-async function iniciarCamera() {
+const video =
+document.getElementById("camera");
 
-    try {
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false
-        });
+const canvas =
+document.getElementById("fotoCanvas");
 
-        video.srcObject = stream;
 
-        video.onloadedmetadata = () => {
-            video.play();
-        };
+const ctx =
+canvas.getContext("2d");
 
-    } catch (erro) {
 
-        alert(
-            "Erro ao abrir a câmera: " +
-            erro.message
-        );
+const moldura =
+document.getElementById("moldura");
 
-    }
+
+async function iniciarCamera(){
+
+try{
+
+const stream =
+await navigator.mediaDevices.getUserMedia({
+
+video:{
+    facingMode:"environment",
+    aspectRatio:9/16
+},
+
+audio:false
+
+});
+
+
+video.srcObject = stream;
+
+
+}catch(erro){
+
+alert(
+"Erro ao abrir câmera: "
++ erro.message
+);
 
 }
 
-iniciarCamera();
+}
 
-function trocarMoldura(nomeArquivo){
+
+iniciarCamera();
+    function trocarMoldura(nomeArquivo){
 
     const img = new Image();
 
@@ -176,88 +208,164 @@ function trocarMoldura(nomeArquivo){
     };
 
     img.onerror = function(){
-        alert("Imagem não encontrada: " + nomeArquivo);
+        alert("Moldura não encontrada: " + nomeArquivo);
     };
 
     img.src = nomeArquivo;
 
 }
 
-document.getElementById("capturar")
-.addEventListener("click", () => {
 
-    if (!video.videoWidth) {
+
+document
+.getElementById("capturar")
+.addEventListener("click", async ()=>{
+
+
+    if(!video.videoWidth){
 
         alert("A câmera ainda não carregou.");
         return;
 
     }
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+
+    // Define o tamanho final em Story 9:16
+
+    const largura = 1080;
+    const altura = 1920;
+
+
+    canvas.width = largura;
+    canvas.height = altura;
+
+
+    // Ajusta a câmera para preencher o Story
+
+    const proporcaoVideo =
+    video.videoWidth / video.videoHeight;
+
+
+    const proporcaoCanvas =
+    largura / altura;
+
+
+    let sx = 0;
+    let sy = 0;
+    let sw = video.videoWidth;
+    let sh = video.videoHeight;
+
+
+    if(proporcaoVideo > proporcaoCanvas){
+
+        sw =
+        video.videoHeight * proporcaoCanvas;
+
+        sx =
+        (video.videoWidth - sw) / 2;
+
+    }else{
+
+        sh =
+        video.videoWidth / proporcaoCanvas;
+
+        sy =
+        (video.videoHeight - sh) / 2;
+
+    }
+
 
     ctx.drawImage(
         video,
+        sx,
+        sy,
+        sw,
+        sh,
         0,
         0,
-        canvas.width,
-        canvas.height
+        largura,
+        altura
     );
+
+
+    // Coloca a moldura por cima
 
     const img = new Image();
 
-    img.onload = function(){
+
+    img.onload = async function(){
+
 
         ctx.drawImage(
             img,
             0,
             0,
-            canvas.width,
-            canvas.height
+            largura,
+            altura
         );
 
-        canvas.toBlob(async (blob) => {
+
+        canvas.toBlob(
+        async(blob)=>{
+
 
             const nomeArquivo =
-                "foto_" +
-                Date.now() +
-                ".png";
+            "foto_" +
+            Date.now() +
+            ".png";
 
-            const { error } =
-                await supabaseClient.storage
-                .from("Aniversário Noah e Valentina")
-                .upload(
-                    nomeArquivo,
-                    blob,
-                    {
-                        contentType: "image/png"
-                    }
-                );
 
-            if (error) {
+
+            const {error} =
+            await supabaseClient
+            .storage
+            .from("galeria-noah-valentina")
+            .upload(
+                nomeArquivo,
+                blob,
+                {
+                    contentType:
+                    "image/png"
+                }
+            );
+
+
+
+            if(error){
 
                 alert(
-                    "Erro ao enviar foto: " +
-                    error.message
+                "Erro ao enviar foto: "
+                + error.message
                 );
 
                 return;
 
             }
 
+
+
             alert(
-                "Foto enviada para a galeria com sucesso!"
+            "📸 Foto salva na galeria!"
             );
 
-        }, "image/png");
+
+        },
+        "image/png"
+        );
+
 
     };
 
-    img.src = moldura.src;
+
+    img.src =
+    moldura.src;
+
 
 });
 
+
 </script>
+
 
 </body>
 </html>
