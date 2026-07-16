@@ -174,7 +174,7 @@ const stream =
 await navigator.mediaDevices.getUserMedia({
 
 video:{
-    facingMode:"environment",
+    facingMode:{ ideal:"user" },
     aspectRatio:9/16
 },
 
@@ -319,7 +319,7 @@ document
             const {error} =
             await supabaseClient
             .storage
-            .from("galeria-noah-valentina")
+            .from("fotos-noah-valentina")
             .upload(
                 nomeArquivo,
                 blob,
