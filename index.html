@@ -119,6 +119,17 @@ Moldura 3
 <canvas id="fotoCanvas"></canvas>
 
 <script>
+const SUPABASE_URL =
+"https://wnbarrxdifratefmujch.supabase.co";
+
+const SUPABASE_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduYmFycnhkaWZyYXRlZm11amNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNTM3OTMsImV4cCI6MjA5OTcyOTc5M30.70ZCtnf8rdkhPdgaJqsNEl9F8UxHRWgkDMTFqvi-SDI";
+
+const supabaseClient =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
 const video = document.getElementById("camera");
 const canvas = document.getElementById("fotoCanvas");
@@ -141,8 +152,6 @@ async function iniciarCamera() {
         };
 
     } catch (erro) {
-
-        console.error(erro);
 
         alert(
             "Erro ao abrir a câmera: " +
@@ -177,7 +186,6 @@ document.getElementById("capturar")
     if (!video.videoWidth) {
 
         alert("A câmera ainda não carregou.");
-
         return;
 
     }
@@ -205,13 +213,40 @@ document.getElementById("capturar")
             canvas.height
         );
 
-        const link = document.createElement("a");
+        canvas.toBlob(async (blob) => {
 
-        link.download = "foto-festa.png";
+            const nomeArquivo =
+                "foto_" +
+                Date.now() +
+                ".png";
 
-        link.href = canvas.toDataURL("image/png");
+            const { error } =
+                await supabaseClient.storage
+                .from("Aniversário Noah e Valentina")
+                .upload(
+                    nomeArquivo,
+                    blob,
+                    {
+                        contentType: "image/png"
+                    }
+                );
 
-        link.click();
+            if (error) {
+
+                alert(
+                    "Erro ao enviar foto: " +
+                    error.message
+                );
+
+                return;
+
+            }
+
+            alert(
+                "Foto enviada para a galeria com sucesso!"
+            );
+
+        }, "image/png");
 
     };
 
